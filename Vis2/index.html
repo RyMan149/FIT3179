@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Australia's Rainfall Relationship with Climate Change</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/3.0.0/pure-min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .infographic {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .section {
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+        }
+        .chart-container {
+            flex: 1;
+            min-height: 400px;
+        }
+        .text-container {
+            flex: 1;
+            padding: 0 20px;
+        }
+        .text-container p {
+            text-align: justify;
+        }
+        @media (max-width: 768px) {
+            .section {
+                flex-direction: column;
+            }
+            .chart-container, .text-container {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="infographic">
+        <h1>Australia's Rainfall Relationship with Climate Change</h1>
+        
+        <div class="section">
+            <div class="text-container">
+                <!-- <h2>Geographical Contrasts</h2> -->
+                <p style="font-size:19px; ">Australia's rainfall narrative begins with its stark geographical contrasts. The eastern states receive substantially more rainfall compared to the west, largely due to the latter's vast desert regions. This disparity highlights the unique climatic conditions across the continent, where lush coastal areas stand in sharp contrast to the arid interiors.</p>
+                <p style="font-size:19px; ">Australia's cyclical rainfall patterns also play a significant role in its water story. Most of the rainfall is concentrated between November and April, creating a distinct wet season. However, this abundance is followed by drier months, underscoring the cyclical nature of the country's climate. Historically, Australia has experienced large fluctuations in annual rainfall, a trend exacerbated by climate change, leading to more extreme weather events and unpredictable patterns.</p>
+            </div>
+            <div class="chart-container" id="chart1"></div>
+        </div>
+
+        <div class="section">
+            <div class="chart-container" id="chart2"></div>
+            <div class="chart-container" id="chart3"></div>
+        </div>
+
+        <div class="section" style="display: flex; align-items: flex-start;">
+            <div class="chart-container" id="chart4"></div>
+            <div class="text-container" style="margin-left: 1px;">
+                <!-- <h2>Water Storage Challenges</h2> -->
+                <p style="font-size: 19px;">
+                    Compounding these fluctuations is the steadily decreasing capacity of Australia's water storage. This decline is yet another symptom of climate change, impacting the balance between human consumption and natural replenishment. Australians are constantly reminded of the delicate equilibrium that must be maintained to ensure sustainable water use amidst these changing conditions.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vega/5.22.1/vega.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-lite/5.6.0/vega-lite.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-embed/6.21.0/vega-embed.min.js"></script>
+    <script>
+        // Chart 1: Average Australian Rainfall by State 2023
+        const spec1 = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "width": 500,
+            "height": 400,
+            "title": {
+                "text": "Average Australian Rainfall by State 2023",
+                "fontSize": 18,
+                "anchor": "start"
+            },
+            "layer": [
+                {
+                    "data": {
+                        "url": "https://raw.githubusercontent.com/tonywr71/GeoJson-Data/master/australian-states.json",
+                        "format": {
+                            "type": "json",
+                            "property": "features"
+                        }
+                    },
+                    "transform": [
+                        {
+                            "lookup": "properties.STATE_NAME",
+                            "from": {
+                                "data": {
+                                    "url": "https://raw.githubusercontent.com/RyMan149/FIT3179/main/data/AverageRainfallAus.csv",
+                                    "format": {
+                                        "type": "csv"
+                                    }
+                                },
+                                "key": "Location",
+                                "fields": ["Average (mm)", "Departure from mean"]
+                            }
+                        }
+                    ],
+                    "mark": {
+                        "type": "geoshape",
+                        "stroke": "lightsalmon",
+                        "strokeWidth": 1.2
+                    },
+                    "encoding": {
+                        "color": {
+                            "field": "Average (mm)",
+                            "type": "quantitative",
+                            "scale": {
+                                "scheme": "tealblues"
+                            }
+                        },
+                        "tooltip": [
+                            {"field": "properties.STATE_NAME", "title": "State"},
+                            {"field": "Average (mm)", "type": "quantitative", "title": "Avg Rainfall (mm)"},
+                            {"field": "Departure from mean", "type": "nominal", "title": "Departure from Mean"}
+                        ]
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "geoshape",
+                        "stroke": "lightgray",
+                        "strokeWidth": 0.5
+                    },
+                    "data": {
+                        "graticule": true
+                    }
+                }
+            ],
+            "projection": {
+                "type": "mercator",
+                "scale": 600,
+                "center": [133.5, -28.5]
+            }
+        };
+
+        // Chart 2: Average Annual Rainfall in Australia (1900-2023)
+        const spec2 = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "title": {
+                "text": "Average Annual Rainfall in Australia (1900-2023)",
+                "fontSize": 18,
+                "anchor": "start"
+            },
+            "data": {
+                "url": "https://raw.githubusercontent.com/RyMan149/FIT3179/main/data/average-aus-rainfall-data.csv"
+            },
+            "params": [
+                {
+                    "name": "minYear",
+                    "value": 1900,
+                    "bind": {
+                        "input": "range",
+                        "min": 1900,
+                        "max": 2023,
+                        "step": 1,
+                        "name": "Year Limit One: "
+                    }
+                },
+                {
+                    "name": "maxYear",
+                    "value": 2023,
+                    "bind": {
+                        "input": "range",
+                        "min": 1900,
+                        "max": 2023,
+                        "step": 1,
+                        "name": "Year Limit Two: "
+                    }
+                }
+            ],
+            "transform": [
+                {
+                    "filter": "datum.Year >= min(minYear, maxYear) && datum.Year <= max(minYear, maxYear)"
+                }
+            ],
+            "layer": [
+                {
+                    "mark": {
+                        "type": "bar",
+                        "clip": true
+                    },
+                    "encoding": {
+                        "x": {
+                            "field": "Year",
+                            "type": "ordinal",
+                            "axis": {
+                                "labelAngle": -45,
+                                "labelOverlap": "greedy"
+                            }
+                        },
+                        "y": {
+                            "field": "Average Annual Rainfall (mm)",
+                            "type": "quantitative",
+                            "scale": {
+                                "domain": [200, 800]
+                            },
+                            "axis": {
+                                "title": "Average Annual Rainfall (mm)"
+                            }
+                        },
+                        "color": {
+                            "field": "Average Annual Rainfall (mm)",
+                            "type": "quantitative",
+                            "scale": {
+                                "scheme": "tealblues"
+                            },
+                            "legend": {
+                                "title": "Rainfall (mm)" 
+                            }
+                        },
+                        "tooltip": [
+                            {"field": "Year", "type": "ordinal", "title": "Year: "},
+                            {"field": "Average Annual Rainfall (mm)", "type": "quantitative", "title": "Average Rainfall (mm): "}
+                        ]
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "rule",
+                        "color": "lightsalmon",
+                        "strokeWidth": 2.5
+                    },
+                    "transform": [
+                        {
+                            "aggregate": [{
+                                "op": "mean",
+                                "field": "Average Annual Rainfall (mm)",
+                                "as": "overall_average"
+                            }]
+                        }
+                    ],
+                    "encoding": {
+                        "y": {"field": "overall_average", "type": "quantitative"},
+                        "tooltip": [
+                            {"field": "overall_average", "type": "quantitative", "title": "Overall Average (mm): ", "format": ".1f"}
+                        ]
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "text",
+                        "align": "left",
+                        "baseline": "bottom",
+                        "dx": 5,
+                        "dy": -5,
+                        "fontSize": 11,
+                        "fontStyle": "italic"
+                    },
+                    "transform": [
+                        {"filter": "datum.Year == 1974"},
+                        {"filter": "1974 >= min(minYear, maxYear) && 1974 <= max(minYear, maxYear)"}
+                    ],
+                    "encoding": {
+                        "x": {"field": "Year", "type": "ordinal"},
+                        "y": {"field": "Average Annual Rainfall (mm)", "type": "quantitative"},
+                        "text": {"value": "1974 - Record Breaking Rainfall"}
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "text",
+                        "align": "left",
+                        "baseline": "bottom",
+                        "dx": 5,
+                        "dy": -5,
+                        "fontSize": 11,
+                        "fontStyle": "italic"
+                    },
+                    "transform": [
+                        {"filter": "datum.Year == 1917"},
+                        {"filter": "1917 >= min(minYear, maxYear) && 1917 <= max(minYear, maxYear)"}
+                    ],
+                    "encoding": {
+                        "x": {"field": "Year", "type": "ordinal"},
+                        "y": {"field": "Average Annual Rainfall (mm)", "type": "quantitative"},
+                        "text": {"value": "1917 - Most Rainfall for 30 Years"}
+                    }
+                }
+            ],
+            "width": 650,
+            "height": 250
+        };
+
+        // Chart 3: Mean Monthly Rainfall in Australia
+        const spec3 = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "title": {
+                "text": "Mean Monthly Rainfall in Australia",
+                "fontSize": 18,
+                "anchor": "start"
+            },
+            "width": 350,
+            "height": 250,
+            "data": {
+                "url": "https://raw.githubusercontent.com/RyMan149/FIT3179/main/data/Australian%20Mean%20Monthly%20Rainfall.csv"
+            },
+            "encoding": {
+                "x": {
+                    "field": "Month",
+                    "type": "ordinal",
+                    "sort": [
+                        "January", "February", "March", "April", "May", "June",
+                        "July", "August", "September", "October", "November", "December"
+                    ],
+                    "axis": {"title": "Month"}
+                },
+                "y": {
+                    "field": "Rainfall (mm)",
+                    "type": "quantitative",
+                    "axis": {"title": "Rainfall (mm)"}
+                },
+                "tooltip": [
+                    {"field": "Month", "type": "ordinal"},
+                    {"field": "Rainfall (mm)", "type": "quantitative", "format": ".1f"}
+                ]
+            },
+            "layer": [
+                {
+                    "mark": {
+                        "type": "line",
+                        "color": "darkturquoise"
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "point",
+                        "color": "salmon",
+                        "filled": true,
+                        "size": 50
+                    }
+                }
+            ]
+        };
+
+        // Chart 4: National Water Storage Percentage Over Time
+        const spec4 = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "title": {
+                "text": "National Water Storage Percentage Over Time",
+                "fontSize": 18,
+                "anchor": "start"
+            },
+            "width": 800,
+            "height": 300,
+            "data": {
+                "url": "https://raw.githubusercontent.com/RyMan149/FIT3179/main/data/National%20Water%20Storage.csv",
+                "format": {
+                    "type": "csv",
+                    "parse": {
+                        "Date": "date:'%d/%m/%Y'",
+                        "Percentage Full": "number"
+                    }
+                }
+            },
+            "mark": {
+                "type": "area",
+                "line": {
+                    "color": "teal"
+                },
+                "color": {
+                    "x1": 1,
+                    "y1": 1,
+                    "x2": 1,
+                    "y2": 0,
+                    "gradient": "linear",
+                    "stops": [
+                        {"offset": 0, "color": "lightcyan"},
+                        {"offset": 1, "color": "teal"}
+                    ]
+                }
+            },
+            "encoding": {
+                "x": {
+                    "field": "Date",
+                    "type": "temporal",
+                    "title": "Date",
+                    "axis": {"format": "%Y"}
+                },
+                "y": {
+                    "field": "Percentage Full",
+                    "type": "quantitative",
+                    "title": "Percentage Full %",
+                    "scale": {"domain": [0, 100]}
+                },
+                "tooltip": [
+                    {"field": "Date", "type": "temporal", "title": "Date", "format": "%d %b %Y"},
+                    {"field": "Percentage Full", "type": "quantitative", "title": "Percentage Full", "format": ".1f"}
+                ]
+            }
+        };
+
+        // Render the charts
+        vegaEmbed('#chart1', spec1, {mode: "vega-lite"}).then(console.log).catch(console.warn);
+        vegaEmbed('#chart2', spec2, {mode: "vega-lite"}).then(console.log).catch(console.warn);
+        vegaEmbed('#chart3', spec3, {mode: "vega-lite"}).then(console.log).catch(console.warn);
+        vegaEmbed('#chart4', spec4, {mode: "vega-lite"}).then(console.log).catch(console.warn);
+    </script>
+</body>
+</html>
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Australia's Rainfall Relationship with Climate Change</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/3.0.0/pure-min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .infographic {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .chart-container {
+            margin-bottom: 30px;
+        }
+        .story {
+            background-color: #e8f4f8;
+            border-left: 5px solid #3498db;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .pure-g {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="infographic">
+        <h1>Australia's Rainfall Relationship with Climate Change</h1>
+        
+        <div class="story">
+            <p>Australia's rainfall narrative begins with its stark geographical contrasts. The eastern states receive substantially more rainfall compared to the west, largely due to the latter's vast desert regions. This disparity highlights the unique climatic conditions across the continent, where lush coastal areas stand in sharp contrast to the arid interiors.</p>
+            <p>Australia's cyclical rainfall patterns also play a significant role in its water story. Most of the rainfall is concentrated between November and April, creating a distinct wet season. However, this abundance is followed by drier months, underscoring the cyclical nature of the country's climate. Historically, Australia has experienced large fluctuations in annual rainfall, a trend exacerbated by climate change, leading to more extreme weather events and unpredictable patterns.</p>
+            <p>Compounding these fluctuations is the steadily decreasing capacity of Australia's water storage. This decline is yet another symptom of climate change, impacting the balance between human consumption and natural replenishment. Australians are constantly reminded of the delicate equilibrium that must be maintained to ensure sustainable water use amidst these changing conditions.</p>
+        </div>
+
+        <div class="pure-g">
+            <div class="pure-u-1 pure-u-md-1-2 chart-container">
+                <div id="chart1"></div>
+            </div>
+            <div class="pure-u-1 pure-u-md-1-2 chart-container">
+                <div id="chart2"></div>
+            </div>
+        </div>
+
+        <div class="pure-g">
+            <div class="pure-u-1 pure-u-md-1-2 chart-container">
+                <div id="chart3"></div>
+            </div>
+            <div class="pure-u-1 pure-u-md-1-2 chart-container">
+                <div id="chart4"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vega/5.22.1/vega.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-lite/5.6.0/vega-lite.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-embed/6.21.0/vega-embed.min.js"></script>
+    <script>
+        // Chart 1: Average Australian Rainfall by State 2023
+        const spec1 = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "width": 500,
+            "height": 400,
+            "title": {
+                "text": "Average Australian Rainfall by State 2023",
+                "fontSize": 18,
+                "anchor": "start"
+            },
+            "layer": [
+                {
+                    "data": {
+                        "url": "https://raw.githubusercontent.com/tonywr71/GeoJson-Data/master/australian-states.json",
+                        "format": {
+                            "type": "json",
+                            "property": "features"
+                        }
+                    },
+                    "transform": [
+                        {
+                            "lookup": "properties.STATE_NAME",
+                            "from": {
+                                "data": {
+                                    "url": "https://raw.githubusercontent.com/RyMan149/FIT3179/main/data/AverageRainfallAus.csv",
+                                    "format": {
+                                        "type": "csv"
+                                    }
+                                },
+                                "key": "Location",
+                                "fields": ["Average (mm)", "Departure from mean"]
+                            }
+                        }
+                    ],
+                    "mark": {
+                        "type": "geoshape",
+                        "stroke": "lightsalmon",
+                        "strokeWidth": 1.2
+                    },
+                    "encoding": {
+                        "color": {
+                            "field": "Average (mm)",
+                            "type": "quantitative",
+                            "scale": {
+                                "scheme": "tealblues"
+                            }
+                        },
+                        "tooltip": [
+                            {"field": "properties.STATE_NAME", "title": "State"},
+                            {"field": "Average (mm)", "type": "quantitative", "title": "Avg Rainfall (mm)"},
+                            {"field": "Departure from mean", "type": "nominal", "title": "Departure from Mean"}
+                        ]
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "geoshape",
+                        "stroke": "lightgray",
+                        "strokeWidth": 0.5
+                    },
+                    "data": {
+                        "graticule": true
+                    }
+                }
+            ],
+            "projection": {
+                "type": "mercator",
+                "scale": 600,
+                "center": [133.5, -28.5]
+            }
+        };
+
+        // Chart 2: Average Annual Rainfall in Australia (1900-2023)
+        const spec2 = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "title": {
+                "text": "Average Annual Rainfall in Australia (1900-2023)",
+                "fontSize": 18,
+                "anchor": "start"
+            },
+            "data": {
+                "url": "https://raw.githubusercontent.com/RyMan149/FIT3179/main/data/average-aus-rainfall-data.csv"
+            },
+            "params": [
+                {
+                    "name": "minYear",
+                    "value": 1900,
+                    "bind": {
+                        "input": "range",
+                        "min": 1900,
+                        "max": 2023,
+                        "step": 1,
+                        "name": "Year Limit One: "
+                    }
+                },
+                {
+                    "name": "maxYear",
+                    "value": 2023,
+                    "bind": {
+                        "input": "range",
+                        "min": 1900,
+                        "max": 2023,
+                        "step": 1,
+                        "name": "Year Limit Two: "
+                    }
+                }
+            ],
+            "transform": [
+                {
+                    "filter": "datum.Year >= min(minYear, maxYear) && datum.Year <= max(minYear, maxYear)"
+                }
+            ],
+            "layer": [
+                {
+                    "mark": {
+                        "type": "bar",
+                        "clip": true
+                    },
+                    "encoding": {
+                        "x": {
+                            "field": "Year",
+                            "type": "ordinal",
+                            "axis": {
+                                "labelAngle": -45,
+                                "labelOverlap": "greedy"
+                            }
+                        },
+                        "y": {
+                            "field": "Average Annual Rainfall (mm)",
+                            "type": "quantitative",
+                            "scale": {
+                                "domain": [200, 800]
+                            },
+                            "axis": {
+                                "title": "Average Annual Rainfall (mm)"
+                            }
+                        },
+                        "color": {
+                            "field": "Average Annual Rainfall (mm)",
+                            "type": "quantitative",
+                            "scale": {
+                                "scheme": "tealblues"
+                            }
+                        },
+                        "tooltip": [
+                            {"field": "Year", "type": "ordinal", "title": "Year: "},
+                            {"field": "Average Annual Rainfall (mm)", "type": "quantitative", "title": "Average Rainfall (mm): "}
+                        ]
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "rule",
+                        "color": "lightsalmon",
+                        "strokeWidth": 2.5
+                    },
+                    "transform": [
+                        {
+                            "aggregate": [{
+                                "op": "mean",
+                                "field": "Average Annual Rainfall (mm)",
+                                "as": "overall_average"
+                            }]
+                        }
+                    ],
+                    "encoding": {
+                        "y": {"field": "overall_average", "type": "quantitative"},
+                        "tooltip": [
+                            {"field": "overall_average", "type": "quantitative", "title": "Overall Average (mm): ", "format": ".1f"}
+                        ]
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "text",
+                        "align": "left",
+                        "baseline": "bottom",
+                        "dx": 5,
+                        "dy": -5,
+                        "fontSize": 11,
+                        "fontStyle": "italic"
+                    },
+                    "transform": [
+                        {"filter": "datum.Year == 1974"},
+                        {"filter": "1974 >= min(minYear, maxYear) && 1974 <= max(minYear, maxYear)"}
+                    ],
+                    "encoding": {
+                        "x": {"field": "Year", "type": "ordinal"},
+                        "y": {"field": "Average Annual Rainfall (mm)", "type": "quantitative"},
+                        "text": {"value": "1974 - Record Breaking Rainfall"}
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "text",
+                        "align": "left",
+                        "baseline": "bottom",
+                        "dx": 5,
+                        "dy": -5,
+                        "fontSize": 11,
+                        "fontStyle": "italic"
+                    },
+                    "transform": [
+                        {"filter": "datum.Year == 1917"},
+                        {"filter": "1917 >= min(minYear, maxYear) && 1917 <= max(minYear, maxYear)"}
+                    ],
+                    "encoding": {
+                        "x": {"field": "Year", "type": "ordinal"},
+                        "y": {"field": "Average Annual Rainfall (mm)", "type": "quantitative"},
+                        "text": {"value": "1917 - Most Rainfall for 30 Years"}
+                    }
+                }
+            ],
+            "width": 650,
+            "height": 250
+        };
+
+        // Chart 3: Mean Monthly Rainfall in Australia
+        const spec3 = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "title": {
+                "text": "Mean Monthly Rainfall in Australia",
+                "fontSize": 18,
+                "anchor": "start"
+            },
+            "width": 350,
+            "height": 250,
+            "data": {
+                "url": "https://raw.githubusercontent.com/RyMan149/FIT3179/main/data/Australian%20Mean%20Monthly%20Rainfall.csv"
+            },
+            "encoding": {
+                "x": {
+                    "field": "Month",
+                    "type": "ordinal",
+                    "sort": [
+                        "January", "February", "March", "April", "May", "June",
+                        "July", "August", "September", "October", "November", "December"
+                    ],
+                    "axis": {"title": "Month"}
+                },
+                "y": {
+                    "field": "Rainfall (mm)",
+                    "type": "quantitative",
+                    "axis": {"title": "Rainfall (mm)"}
+                },
+                "tooltip": [
+                    {"field": "Month", "type": "ordinal"},
+                    {"field": "Rainfall (mm)", "type": "quantitative", "format": ".1f"}
+                ]
+            },
+            "layer": [
+                {
+                    "mark": {
+                        "type": "line",
+                        "color": "darkturquoise"
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "point",
+                        "color": "salmon",
+                        "filled": true,
+                        "size": 50
+                    }
+                }
+            ]
+        };
+
+        // Chart 4: National Water Storage Percentage Over Time
+        const spec4 = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "title": {
+                "text": "National Water Storage Percentage Over Time",
+                "fontSize": 18,
+                "anchor": "start"
+            },
+            "width": 800,
+            "height": 300,
+            "data": {
+                "url": "https://raw.githubusercontent.com/RyMan149/FIT3179/main/data/National%20Water%20Storage.csv",
+                "format": {
+                    "type": "csv",
+                    "parse": {
+                        "Date": "date:'%d/%m/%Y'",
+                        "Percentage Full": "number"
+                    }
+                }
+            },
+            "mark": {
+                "type": "area",
+                "line": {
+                    "color": "teal"
+                },
+                "color": {
+                    "x1": 1,
+                    "y1": 1,
+                    "x2": 1,
+                    "y2": 0,
+                    "gradient": "linear",
+                    "stops": [
+                        {"offset": 0, "color": "lightcyan"},
+                        {"offset": 1, "color": "teal"}
+                    ]
+                }
+            },
+            "encoding": {
+                "x": {
+                    "field": "Date",
+                    "type": "temporal",
+                    "title": "Date",
+                    "axis": {"format": "%Y"}
+                },
+                "y": {
+                    "field": "Percentage Full",
+                    "type": "quantitative",
+                    "title": "Percentage Full %",
+                    "scale": {"domain": [0, 100]}
+                },
+                "tooltip": [
+                    {"field": "Date", "type": "temporal", "title": "Date", "format": "%d %b %Y"},
+                    {"field": "Percentage Full", "type": "quantitative", "title": "Percentage Full", "format": ".1f"}
+                ]
+            }
+        };
+
+    // Render the charts
+    vegaEmbed('#chart1', spec1, {mode: "vega-lite"}).then(console.log).catch(console.warn);
+    vegaEmbed('#chart2', spec2, {mode: "vega-lite"}).then(console.log).catch(console.warn);
+    vegaEmbed('#chart3', spec3, {mode: "vega-lite"}).then(console.log).catch(console.warn);
+    vegaEmbed('#chart4', spec4, {mode: "vega-lite"}).then(console.log).catch(console.warn);
+    </script>
+</body>
+</html> -->

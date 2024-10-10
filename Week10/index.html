@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/vega@5.30.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.20.1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.26.0"></script>
+  <style>
+    .vis-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+    }
+    .vis {
+      margin: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="vis-container">
+    <div id="vis1" class="vis"></div>
+    <div id="vis2" class="vis"></div>
+  </div>
+  <script>
+    const spec1 = {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "width": 500,
+      "height": 400,
+      "title": {
+        "text": "Average Rainfall throughout Australia 2023",
+        "fontSize": 18,
+        "anchor": "start"
+      },
+      "layer": [
+        {
+          "data": {
+            "url": "https://raw.githubusercontent.com/tonywr71/GeoJson-Data/master/australian-states.json",
+            "format": {"type": "json", "property": "features"}
+          },
+          "transform": [
+            {
+              "lookup": "properties.STATE_NAME",
+              "from": {
+                "data": {
+                  "url": "https://raw.githubusercontent.com/RyMan149/FIT3179/main/data/AverageRainfallAus.csv",
+                  "format": {"type": "csv"}
+                },
+                "key": "Location",
+                "fields": ["Average (mm)", "Departure from mean"]
+              }
+            }
+          ],
+          "mark": {"type": "geoshape", "stroke": "whitesmoke", "strokeWidth": 2},
+          "encoding": {
+            "color": {
+              "field": "Average (mm)",
+              "type": "quantitative",
+              "scale": {"scheme": "blues"}
+            },
+            "tooltip": [
+              {"field": "properties.STATE_NAME", "title": "State"},
+              {
+                "field": "Average (mm)",
+                "type": "quantitative",
+                "title": "Avg Rainfall (mm)"
+              },
+              {
+                "field": "Departure from mean",
+                "type": "nominal",
+                "title": "Departure from Mean"
+              }
+            ]
+          }
+        },
+        {
+          "mark": {"type": "geoshape", "stroke": "lightgray", "strokeWidth": 0.5},
+          "data": {"graticule": true}
+        }
+      ],
+      "projection": {"type": "mercator", "scale": 600, "center": [133.5, -28.5]},
+      "config": {}
+    };
+
+    const spec2 = {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "title": "Average Annual Rainfall in Australia (1900-2023)",
+      "data": {
+        "url": "https://raw.githubusercontent.com/RyMan149/FIT3179/main/data/average-aus-rainfall-data.csv"
+      },
+      "params": [
+        {
+          "name": "minYear",
+          "value": 1900,
+          "bind": {
+            "input": "range",
+            "min": 1900,
+            "max": 2023,
+            "step": 1,
+            "name": "Year Limit One: "
+          }
+        },
+        {
+          "name": "maxYear",
+          "value": 2023,
+          "bind": {
+            "input": "range",
+            "min": 1900,
+            "max": 2023,
+            "step": 1,
+            "name": "Year Limit Two: "
+          }
+        }
+      ],
+      "transform": [
+        {
+          "filter": "datum.Year >= min(minYear, maxYear) && datum.Year <= max(minYear, maxYear)"
+        }
+      ],
+      "layer": [
+        {
+          "mark": {
+            "type": "bar",
+            "clip": true
+          },
+          "encoding": {
+            "x": {
+              "field": "Year",
+              "type": "ordinal",
+              "axis": {
+                "labelAngle": -45,
+                "labelOverlap": "greedy"
+              }
+            },
+            "y": {
+              "field": "Average Annual Rainfall (mm)",
+              "type": "quantitative",
+              "scale": {
+                "domain": [200, 800]
+              },
+              "axis": {
+                "title": "Average Annual Rainfall (mm)"
+              }
+            },
+            "color": {
+              "field": "Average Annual Rainfall (mm)",
+              "type": "quantitative",
+              "scale": {
+                "scheme": "blues"
+              }
+            },
+            "tooltip": [
+              {"field": "Year", "type": "ordinal", "title": "Year: "},
+              {"field": "Average Annual Rainfall (mm)", "type": "quantitative", "title": "Average Rainfall (mm): "}
+            ]
+          }
+        },
+        {
+          "mark": {
+            "type": "rule",
+            "color": "green",
+            "strokeWidth": 2
+          },
+          "transform": [
+            {
+              "aggregate": [{
+                "op": "mean",
+                "field": "Average Annual Rainfall (mm)",
+                "as": "overall_average"
+              }]
+            }
+          ],
+          "encoding": {
+            "y": {"field": "overall_average", "type": "quantitative"},
+            "tooltip": [
+              {"field": "overall_average", "type": "quantitative", "title": "Overall Average (mm): ", "format": ".1f"}
+            ]
+          }
+        },
+        {
+          "mark": {
+            "type": "text",
+            "align": "left",
+            "baseline": "bottom",
+            "dx": 5,
+            "dy": -5,
+            "fontSize": 11,
+            "fontStyle": "italic"
+          },
+          "transform": [
+            {"filter": "datum.Year == 1974"},
+            {"filter": "1974 >= min(minYear, maxYear) && 1974 <= max(minYear, maxYear)"}
+          ],
+          "encoding": {
+            "x": {"field": "Year", "type": "ordinal"},
+            "y": {"field": "Average Annual Rainfall (mm)", "type": "quantitative"},
+            "text": {"value": "1974 - Record Breaking Rainfall"}
+          }
+        },
+        {
+          "mark": {
+            "type": "text",
+            "align": "left",
+            "baseline": "bottom",
+            "dx": 5,
+            "dy": -5,
+            "fontSize": 11,
+            "fontStyle": "italic"
+          },
+          "transform": [
+            {"filter": "datum.Year == 1917"},
+            {"filter": "1917 >= min(minYear, maxYear) && 1917 <= max(minYear, maxYear)"}
+          ],
+          "encoding": {
+            "x": {"field": "Year", "type": "ordinal"},
+            "y": {"field": "Average Annual Rainfall (mm)", "type": "quantitative"},
+            "text": {"value": "1917 - Most Rainfall for 30 Years"}
+          }
+        }
+      ],
+      "width": 800,
+      "height": 400
+    };
+
+    vegaEmbed("#vis1", spec1, {mode: "vega-lite"}).then(console.log).catch(console.warn);
+    vegaEmbed("#vis2", spec2, {mode: "vega-lite"}).then(console.log).catch(console.warn);
+  </script>
+</body>
+</html>
